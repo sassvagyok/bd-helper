@@ -28,14 +28,14 @@ def mainMenu():
         processConfig(0)
         print(
             colors.reset + colors.fg.lightgrey + "\n----------------------------------------\n" +
-            colors.fg.yellow + colors.bold + "\n\tBeyond Depth Helper v3\t\n" + 
+            colors.fg.yellow + colors.bold + "\n\tBeyond Depth Helper v1.1.0\t\n" + 
             colors.reset + colors.fg.lightgrey + "\n----------------------------------------\n" +
             colors.fg.green + " 1 " +
             colors.fg.lightgrey + "Elérési útvonal megváltotatása\n" +
             colors.fg.green + " 2 "+
-            colors.fg.lightgrey+"Config mentése\n" +
+            colors.fg.lightgrey+"Beállítások mentése\n" +
             colors.fg.green + " 3 "+
-            colors.fg.lightgrey+"Config betöltése\n" +
+            colors.fg.lightgrey+"Beállítások betöltése\n" +
             colors.fg.green + " 4 "+
             colors.fg.lightgrey+"Modok törlése\n\n" +
             colors.fg.green + " 0 " +
@@ -147,7 +147,7 @@ def processConfig(type):
     if type == 3:
         bd_config = data["ConfigsToSave"]
         if len(bd_config) == 0:
-            print(colors.bold + colors.fg.red + "Adj hozzá leglább 1 config fájlt a config.json-ba!")
+            print(colors.bold + colors.fg.red + "Adj hozzá leglább 1 beállítás fájlt a config.json-ba!")
             return False
 
     f.close()
@@ -173,11 +173,15 @@ def saveConfigs():
             if os.path.exists(dst):
                 os.remove(dst)
             shutil.copy(src, dst)
+            print(colors.bold + colors.fg.green + f"Beállítás elmentve: {src}")
             saved += 1
         else:
-            print(colors.bold + colors.fg.red + f"Fájl nem található: {src}")
+            print(colors.bold + colors.fg.red + f"Beállítás nem található: {src}")
 
-    print(colors.reset + colors.bold + colors.fg.green + f"Beállítások elmentve! ({saved}/{len(bd_config)})")
+    if saved == 0:
+        print(colors.reset + colors.bold + colors.fg.red + f"\nBeállítások elmentése sikertelen! ({saved}/{len(bd_config)})")
+    else:
+        print(colors.reset + colors.bold + colors.fg.green + f"\nBeállítások elmentve! ({saved}/{len(bd_config)})")
 
     waitForInput()
 
@@ -195,14 +199,18 @@ def loadConfigs():
             if os.path.exists(dst):
                 os.remove(dst)
             shutil.move(src, dst)
+            print(colors.bold + colors.fg.green + f"Beállítás betöltve: {src}")
             loaded += 1
         else:
-            print(colors.bold + colors.fg.red + f"Fájl nem található: {src}")
+            print(colors.bold + colors.fg.red + f"Beállítás nem található: {src}")
 
     if os.path.isdir("./saved_configs"):
         shutil.rmtree("./saved_configs")
 
-    print(colors.reset + colors.bold + colors.fg.green + f"Beállítások betöltve! ({loaded}/{len(bd_config)})")
+    if loaded == 0:
+        print(colors.reset + colors.bold + colors.fg.red + f"\nBeállítások betöltése sikertelen! ({loaded}/{len(bd_config)})")
+    else:
+        print(colors.reset + colors.bold + colors.fg.green + f"\nBeállítások betöltve! ({loaded}/{len(bd_config)})")
 
     waitForInput()
 
@@ -210,6 +218,7 @@ def loadConfigs():
 def removeMods():
     bd_mods = bd_path + "\\mods"
 
+    removed = 0
     for mod in mods_to_remove:
         found = False
 
@@ -219,6 +228,7 @@ def removeMods():
                     full_path = os.path.join(root, file)
                     print(colors.bold + colors.fg.green + f"\nMod törölve: {mod}")
                     os.remove(full_path)
+                    removed += 1
                     found = True
                     break
             
@@ -227,6 +237,11 @@ def removeMods():
     
         if not found:
             print(colors.bold + colors.fg.red + f"Mod nem található: {mod}")
+
+    if removed == 0:
+        print(colors.reset + colors.bold + colors.fg.red + f"\nModok törlése sikertelen! ({removed}/{len(mods_to_remove)})")
+    else:
+        print(colors.reset + colors.bold + colors.fg.green + f"\nModok törölve! ({removed}/{len(mods_to_remove)})")
 
     waitForInput()
 
