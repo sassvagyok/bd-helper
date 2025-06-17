@@ -1,6 +1,6 @@
 import shutil, os, json, msvcrt
 
-# Konzol színek
+# Console colors
 class colors:
     reset = '\033[0m'
     bold = '\033[01m'
@@ -22,32 +22,41 @@ class colors:
         pink = '\033[95m'
         lightcyan = '\033[96m'
 
-# Főmenü
+# Main menu
 def mainMenu():
+    title = "Beyond Depth Helper v1.2.0"
+    total_width = len(title) + 16
+    dashes = "-" * total_width
+
     while True:
         processConfig(0)
+
         print(
-            colors.reset + colors.fg.lightgrey + "\n----------------------------------------\n" +
-            colors.fg.yellow + colors.bold + "\n\tBeyond Depth Helper v1.1.0\t\n" + 
-            colors.reset + colors.fg.lightgrey + "\n----------------------------------------\n" +
+            colors.reset + colors.fg.lightgrey + f"\n{dashes}\n" +
+            colors.fg.yellow + colors.bold + f"\n\t{title}\n" + 
+            colors.reset + colors.fg.lightgrey + f"\n{dashes}\n" +
             colors.fg.green + " 1 " +
-            colors.fg.lightgrey + "Elérési útvonal megváltotatása\n" +
+            colors.fg.lightgrey + "Change path\n" +
             colors.fg.green + " 2 "+
-            colors.fg.lightgrey+"Beállítások mentése\n" +
+            colors.fg.lightgrey+"Save configs\n" +
             colors.fg.green + " 3 "+
-            colors.fg.lightgrey+"Beállítások betöltése\n" +
+            colors.fg.lightgrey+"Load configs\n" +
             colors.fg.green + " 4 "+
-            colors.fg.lightgrey+"Modok törlése\n\n" +
+            colors.fg.lightgrey+"Remove mods\n" +
+            colors.fg.green + " 5 "+
+            colors.fg.lightgrey+"Copy mods\n\n" +
+            colors.fg.green + " 9 " +
+            colors.fg.lightgrey + "Help\n" +
             colors.fg.green + " 0 " +
-            colors.fg.lightgrey + "Kilépés\n" +
-            colors.reset + colors.fg.lightgrey+"----------------------------------------"
+            colors.fg.lightgrey + "Exit\n" +
+            colors.reset + colors.fg.lightgrey + dashes
             )
         print()
         try:
-            option = int(input("Választott opció: "))
+            option = int(input("Option: "))
             print()
         except ValueError:
-            print(colors.fg.red + colors.bold + "Számot adj meg!" + colors.reset)
+            print(colors.fg.red + colors.bold + "Enter a valid option!" + colors.reset)
             continue
 
         match option:
@@ -64,16 +73,21 @@ def mainMenu():
             case 4:
                 if processConfig(2):
                     removeMods()
+            case 5:
+                if processConfig(0):
+                    copyMods()
+            case 9:
+                showHelp()
             case _:
-                print(colors.fg.red + colors.bold + "Opció nem található!" + colors.reset)
+                print(colors.fg.red + colors.bold + "Entered option not found!" + colors.reset)
 
-# Gombnyomásra várás
+# Waiting for input
 def waitForInput():
-    print(colors.bold + colors.fg.lightgrey + "\nNyomj egy gombot a folytatáshoz...", end="", flush=True)
+    print(colors.bold + colors.fg.lightgrey + "\nPress a button to continue...", end="", flush=True)
     msvcrt.getch()
     print()
 
-# Yes/No eldöntés
+# Yes/No choice
 def getInput(q):
     while True:
         answer = input(f"{q} [y/n]: ").strip().lower()
@@ -84,11 +98,14 @@ def getInput(q):
         else:
             continue
 
-# Config.json feldolgozása
+# Processing config.json
 def processConfig(type):
     global mods_to_remove
     global bd_config
     global bd_path
+
+    if not os.path.exists("./saved_mods"):
+        os.mkdir("./saved_mods")
 
     if not os.path.exists("./config.json"):
         d = {
@@ -123,45 +140,52 @@ def processConfig(type):
 
     if data["BDPath"] == "" or not os.path.isdir(data["BDPath"]) or type == 1:
         if type == 1:
-            print(f"Beállított útvonal: {data["BDPath"]}")
+            print(f"Set path: {data["BDPath"]}")
         while True:
-            new_path = input(colors.reset + "Add meg a Beyond Depth mappáját: ")
+            new_path = input(colors.reset + "Enter the root directory of a modpack: ")
             if os.path.isdir(new_path):
                 break
-            print(colors.bold + colors.fg.red + "A megadott mappa nem található!")
+            print(colors.bold + colors.fg.red + "Provided directory not found!")
 
         data["BDPath"] = new_path
         with open("./config.json", "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
-        print(colors.bold + colors.fg.green + "Elérési útvonal sikeresen hozzáadva!")
+        print(colors.bold + colors.fg.green + "Path added successfully!")
 
     bd_path = data["BDPath"]
 
     if type == 2:
         mods_to_remove = data["ModsToRemove"]
         if len(mods_to_remove) == 0:
-            print(colors.bold + colors.fg.red + "Adj hozzá leglább 1 modot a config.json-ba!")
+            print(colors.bold + colors.fg.red + "Add at least 1 mod to \"ModsToRemove\" inside config.json!")
             return False
         
     if type == 3:
         bd_config = data["ConfigsToSave"]
         if len(bd_config) == 0:
-            print(colors.bold + colors.fg.red + "Adj hozzá leglább 1 beállítás fájlt a config.json-ba!")
+            print(colors.bold + colors.fg.red + "Add at least 1 config file to \"ConfigsToSave\" inside config.json!")
             return False
 
     f.close()
         
     return True
 
-# Configok mentése
+# Help
+def showHelp():
+    print(colors.reset + colors.fg.lightgrey + "Beyond Depth Helper somewhat automates tedious tasks when updating modpacks.\n")
+    print("How to use:\n1. Set the root directory of the desired modpack\n2. Update config.json with your preferences and add mods you want to copy over after updating to 'saved_mods' directory\n3. Before updating the modpack, use 'Save configs'\n4. After updating use 'Load configs'\n5. After updating use 'Remove mods'\n6. After updating use 'Copy mods'")
+
+    waitForInput()
+
+# Save configs
 def saveConfigs():
     if os.path.isdir("./saved_configs"):
-        if (getInput("Már vannak mentett beállítások, felül akarod ezeket írni?")):
+        if (getInput("There are saved configs, do you want to overwrite them?")):
             print()
             shutil.rmtree("./saved_configs")
         else:
-            return
+            return waitForInput()
 
     saved = 0
     for to_save in bd_config:
@@ -173,22 +197,23 @@ def saveConfigs():
             if os.path.exists(dst):
                 os.remove(dst)
             shutil.copy(src, dst)
-            print(colors.bold + colors.fg.green + f"Beállítás elmentve: {src}")
+            print(colors.bold + colors.fg.green + f"Config saved: " + colors.reset + colors.fg.lightgrey + src)
             saved += 1
         else:
-            print(colors.bold + colors.fg.red + f"Beállítás nem található: {src}")
+            print(colors.bold + colors.fg.red + f"Config not found: " + colors.reset + colors.fg.lightgrey + src)
 
     if saved == 0:
-        print(colors.reset + colors.bold + colors.fg.red + f"\nBeállítások elmentése sikertelen! ({saved}/{len(bd_config)})")
+        print(colors.reset + colors.bold + colors.fg.red + f"\nFailed to save configs! ({saved}/{len(bd_config)})")
     else:
-        print(colors.reset + colors.bold + colors.fg.green + f"\nBeállítások elmentve! ({saved}/{len(bd_config)})")
+        print(colors.reset + colors.bold + colors.fg.green + f"\nSuccessfully saved configs! ({saved}/{len(bd_config)})")
 
     waitForInput()
 
-# Configok betöltése
+# Load configs
 def loadConfigs():
     if not os.path.isdir("./saved_configs") or len(os.listdir("./saved_configs")) == 0:
-        return print(colors.bold + colors.fg.red + "Nincsenek mentett beállítások!")
+        print(colors.bold + colors.fg.red + "There are no saved configs!")
+        waitForInput()
 
     loaded = 0
     for to_save in bd_config:
@@ -199,22 +224,22 @@ def loadConfigs():
             if os.path.exists(dst):
                 os.remove(dst)
             shutil.move(src, dst)
-            print(colors.bold + colors.fg.green + f"Beállítás betöltve: {src}")
+            print(colors.bold + colors.fg.green + f"Config loaded: " + colors.reset + colors.fg.lightgrey + src)
             loaded += 1
         else:
-            print(colors.bold + colors.fg.red + f"Beállítás nem található: {src}")
+            print(colors.bold + colors.fg.red + f"Config not found: " + colors.reset + colors.fg.lightgrey + src)
 
     if os.path.isdir("./saved_configs"):
         shutil.rmtree("./saved_configs")
 
     if loaded == 0:
-        print(colors.reset + colors.bold + colors.fg.red + f"\nBeállítások betöltése sikertelen! ({loaded}/{len(bd_config)})")
+        print(colors.reset + colors.bold + colors.fg.red + f"\nFailed to load configs! ({loaded}/{len(bd_config)})")
     else:
-        print(colors.reset + colors.bold + colors.fg.green + f"\nBeállítások betöltve! ({loaded}/{len(bd_config)})")
+        print(colors.reset + colors.bold + colors.fg.green + f"\nSuccessfully loaded configs! ({loaded}/{len(bd_config)})")
 
     waitForInput()
 
-# Modok törlése
+# Remove mods
 def removeMods():
     bd_mods = bd_path + "\\mods"
 
@@ -226,7 +251,7 @@ def removeMods():
             for file in files:
                 if mod.lower() in file.lower():
                     full_path = os.path.join(root, file)
-                    print(colors.bold + colors.fg.green + f"\nMod törölve: {mod}")
+                    print(colors.bold + colors.fg.green + f"\nMod removed: " + colors.reset + colors.fg.lightgrey + mod)
                     os.remove(full_path)
                     removed += 1
                     found = True
@@ -236,12 +261,48 @@ def removeMods():
                 break
     
         if not found:
-            print(colors.bold + colors.fg.red + f"Mod nem található: {mod}")
+            print(colors.bold + colors.fg.red + f"Mod not found: " + colors.reset + colors.fg.lightgrey + mod)
 
     if removed == 0:
-        print(colors.reset + colors.bold + colors.fg.red + f"\nModok törlése sikertelen! ({removed}/{len(mods_to_remove)})")
+        print(colors.reset + colors.bold + colors.fg.red + f"\nFailed to remove mods! ({removed}/{len(mods_to_remove)})")
     else:
-        print(colors.reset + colors.bold + colors.fg.green + f"\nModok törölve! ({removed}/{len(mods_to_remove)})")
+        print(colors.reset + colors.bold + colors.fg.green + f"\nSuccessfully removed mods! ({removed}/{len(mods_to_remove)})")
+
+    waitForInput()
+
+# Copy mods
+def copyMods():
+    if not os.path.isdir("./saved_mods") or len(os.listdir("./saved_mods")) == 0:
+        print(colors.bold + colors.fg.red + "There are no mods to copy!")
+        waitForInput()
+    
+    bd_mods = bd_path + "\\mods"
+
+    copied = 0
+    mods_to_copy = os.listdir("./saved_mods")
+    
+    for mod in mods_to_copy:
+        src = os.path.join("./saved_mods", mod).replace('/', '\\')
+        dst = os.path.join(bd_mods, mod).replace('/', '\\')
+        
+        if os.path.isfile(src):
+            try:
+                if os.path.exists(dst):
+                    if not getInput(f"'{mod}' already exists. Do you want to overwrite it?"):
+                        print(colors.bold + colors.fg.yellow + f"Skipped: " + colors.reset + colors.fg.lightgrey + mod)
+                        continue
+                    os.remove(dst)
+                
+                shutil.copy2(src, dst)
+                print(colors.bold + colors.fg.green + f"Mod copied: " + colors.reset + colors.fg.lightgrey + mod)
+                copied += 1
+            except Exception as e:
+                print(colors.bold + colors.fg.red + f"Failed to copy: " + colors.reset + colors.fg.lightgrey + mod)
+    
+    if copied == 0:
+        print(colors.reset + colors.bold + colors.fg.red + f"\nFailed to copy mods! ({copied}/{len(mods_to_copy)})")
+    else:
+        print(colors.reset + colors.bold + colors.fg.green + f"\nSuccessfully copied mods! ({copied}/{len(mods_to_copy)})")
 
     waitForInput()
 

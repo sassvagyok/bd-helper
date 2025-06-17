@@ -2,3 +2,5 @@ build
 dist
 *.spec
 config.json
+saved_configs
+saved_mods
