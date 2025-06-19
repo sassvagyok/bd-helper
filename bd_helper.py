@@ -330,7 +330,11 @@ def saveConfigs():
         if os.path.exists(src):
             if os.path.exists(dst):
                 os.remove(dst)
-            shutil.copy(src, dst)
+
+            if os.path.isfile(src):
+                shutil.copy(src, dst)
+            if os.path.isdir(src):
+                shutil.copytree(src, dst)
             print(colors.bold + colors.green + f"Config saved: " + colors.reset + colors.lightgrey + src)
             saved += 1
         else:
@@ -356,7 +360,10 @@ def loadConfigs():
 
         if os.path.exists(src):
             if os.path.exists(dst):
-                os.remove(dst)
+                if os.path.isfile(dst):
+                    os.remove(dst)
+                if os.path.isdir(dst):
+                    shutil.rmtree(dst)
             shutil.move(src, dst)
             print(colors.bold + colors.green + f"Config loaded: " + colors.reset + colors.lightgrey + src)
             loaded += 1
