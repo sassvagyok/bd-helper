@@ -14,8 +14,10 @@ Simple-to-use console application to somewhat automate tedious tasks when updati
 ### First use
 1. Download the [latest release](https://github.com/sassvagyok/bd-helper/releases/latest)
 2. On first use, you will be prompted to add a new profile. Name it, then set the path to the root directory of the chosen modpack (eg. `C:\Users\matte\curseforge\minecraft\Instances\BeyondDepth`)
-3. Modify `profiles.json`'s `ConfigsToSave` and `ModsToRemove` fields to your prefered settings but make sure the format is the same as in the examples
-4. Add mods to `.\saved_mods\{profile_name}` that you want to copy over to the modpack's folder after an update
+3. Modify `profiles.json`'s `ConfigsToSave` and `ModsToRemove` fields to your prefered settings
+   - Add new config file paths relatively from the set root folder (eg. `config/xaerominimap.txt`)
+   - Name mods as accurately as possible (you can drop the version) (eg. `controllable-forge-1.20.1-0.21.7.jar` -> `controllable-forge`)
+4. Add mods to `.\saved_mods\{profile_name}` that you want to copy over after an update
 
 ### Managing profiles
 - To add a new profile use `Add new profile`. You can add as many profiles as you want as long as the name isn't a duplicate of an already existing profile

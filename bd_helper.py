@@ -21,41 +21,39 @@ class colors:
     pink = '\033[95m'
     lightcyan = '\033[96m'
 
-# # Main menu
-def mainMenu():
+# Console utilities
+class utilities:
     clear = lambda: os.system('cls')
-    title = "Beyond Depth Helper v1.3.0"
-    total_width = len(title) + 16
-    dashes = "-" * total_width
+    dashes = "-" * 30
 
+# Main menu
+def mainMenu():
     while True:
-        clear()
+        utilities.clear()
         processProfiles(0)
+        utilities.clear()
 
         print(
-            colors.reset + colors.lightgrey + f"\n{dashes}\n" +
-            colors.yellow + colors.bold + f"\n\t{title}\n" +
-            colors.reset + colors.lightgrey + f"\n{dashes}\n" +
-            colors.lightgrey + colors.bold + f"Selected profile: {selected_profile["Name"]}\n\n" + colors.reset +
+            colors.blue + colors.bold + "\nBeyond Depth Helper v1.4.0\n" +
+            colors.lightgrey + colors.bold + "\nSelected profile: " + colors.purple + selected_profile["Name"] + colors.reset +
+            colors.reset + colors.lightgrey + f"\n{utilities.dashes}\n" +
             colors.green + " 1 " +
-            colors.lightgrey + "Select profile\n" +
+            colors.lightgrey + "Select profile\n\n" +
             colors.green + " 2 "+
-            colors.lightgrey+"Add new profile\n" +
-            colors.green + " 3 "+
-            colors.lightgrey+"Remove profile\n" +
-            colors.green + " 4 "+
             colors.lightgrey+"Save configs\n" +
-            colors.green + " 5 "+
+            colors.green + " 3 "+
             colors.lightgrey+"Load configs\n" +
-            colors.green + " 6 "+
+            colors.green + " 4 "+
             colors.lightgrey+"Remove mods\n" +
-            colors.green + " 7 "+
+            colors.green + " 5 "+
             colors.lightgrey+"Copy mods\n\n" +
+            colors.green + " 6 "+
+            colors.lightgrey+"Manage profiles\n\n" +
             colors.green + " 9 " +
             colors.lightgrey + "Help\n" +
             colors.green + " 0 " +
             colors.lightgrey + "Exit\n" +
-            colors.reset + colors.lightgrey + dashes
+            colors.reset + colors.lightgrey + utilities.dashes
             )
         print()
         try:
@@ -69,41 +67,78 @@ def mainMenu():
             case 0:
                 return
             case 1:
-                clear()
+                utilities.clear()
                 print(colors.yellow + colors.bold + "\nSelect profile\n" + colors.reset)
                 selectProfile()
             case 2:
-                clear()
-                print(colors.yellow + colors.bold + "\nAdd profile\n" + colors.reset)
-                addProfile(0)
-            case 3:
-                clear()
-                print(colors.yellow + colors.bold + "\nRemove profile\n" + colors.reset)
-                removeProfile()
-            case 4:
                 if processProfiles(2):
-                    clear()
+                    utilities.clear()
                     print(colors.yellow + colors.bold + "\nSave configs\n" + colors.reset)
                     saveConfigs()
-            case 5:
+            case 3:
                 if processProfiles(2):
-                    clear()
+                    utilities.clear()
                     print(colors.yellow + colors.bold + "\nLoad configs\n" + colors.reset)
                     loadConfigs()
-            case 6:
+            case 4:
                 if processProfiles(1):
-                    clear()
+                    utilities.clear()
                     print(colors.yellow + colors.bold + "\nRemove mods\n" + colors.reset)
                     removeMods()
-            case 7:
+            case 5:
                 if processProfiles(0):
-                    clear()
+                    utilities.clear()
                     print(colors.yellow + colors.bold + "\nCopy mods\n" + colors.reset)
                     copyMods()
+            case 6:
+                utilities.clear()
+                print(colors.yellow + colors.bold + "\nManage profiles\n" + colors.reset)
+                profileMenu()
             case 9:
-                clear()
+                utilities.clear()
                 print(colors.yellow + colors.bold + "\nHelp\n" + colors.reset)
                 showHelp()
+            case _:
+                print(colors.red + colors.bold + "Entered option not found!" + colors.reset)
+
+# Profile menu
+def profileMenu():
+    while True:
+        utilities.clear()
+        processProfiles(0)
+        utilities.clear()
+
+        print(
+            colors.yellow + colors.bold + "\nManage profiles\n" +
+            colors.reset +colors.lightgrey + colors.bold + "\nSelected profile: " + colors.purple + selected_profile["Name"] + colors.reset +
+            colors.reset + colors.lightgrey + f"\n{utilities.dashes}\n" +
+            colors.green + " 1 "+
+            colors.lightgrey+"Add new profile\n" +
+            colors.green + " 2 "+
+            colors.lightgrey+"Remove profile\n\n" +
+            colors.green + " 0 " +
+            colors.lightgrey + "Back\n" +
+            colors.reset + colors.lightgrey + utilities.dashes
+            )
+        print()
+        try:
+            option = int(input("Option: "))
+            print()
+        except ValueError:
+            print(colors.red + colors.bold + "Enter a valid option!" + colors.reset)
+            continue
+
+        match option:
+            case 0:
+                return
+            case 1:
+                utilities.clear()
+                print(colors.yellow + colors.bold + "\nAdd profile\n" + colors.reset)
+                addProfile(0)
+            case 2:
+                utilities.clear()
+                print(colors.yellow + colors.bold + "\nRemove profile\n" + colors.reset)
+                removeProfile()
             case _:
                 print(colors.red + colors.bold + "Entered option not found!" + colors.reset)
 
@@ -130,6 +165,11 @@ def showHelp():
     print("How to use:\n1. Add as many profiles as you want and select the one you want to work with\n2. Update profiles.json with your preferences and add mods you want to copy over after updating to 'saved_mods' directory\n3. Before updating the modpack, use 'Save configs'\n4. After updating use 'Load configs'\n5. After updating use 'Remove mods'\n6. After updating use 'Copy mods'")
 
     waitForInput()
+
+# Update profiles.json
+def updateProfiles(new):
+    with open("./profiles.json", "w", encoding="utf-8") as f:
+        json.dump(new, f, indent=4)
 
 # Process added profiles
 def processProfiles(type):
@@ -214,8 +254,7 @@ def selectProfile():
 
         profiles[0]["Selected"] = selected
 
-        with open("./profiles.json", "w", encoding="utf-8") as f:
-            json.dump(profiles, f, indent=4)
+        updateProfiles(profiles)
 
         print(colors.bold + colors.green + f"Profile '{selected_profile["Name"]}' succesfully selected!")
 
@@ -226,7 +265,10 @@ def addProfile(type):
     while True:
         name = input(colors.reset + "Enter the name of the new profile: ")
 
-        if (type != 1 and any(profile.get("Name") == name for profile in profiles)):
+        if any(c in "\/:*?\"<>|" for c in name):
+            print(colors.bold + colors.red + "\nProfile name can't contain these characters: '\/:*?\"<>|'\n")
+            continue
+        if type != 1 and any(profile.get("Name") == name for profile in profiles):
             print(colors.bold + colors.red + "\nProfile with the entered name already exists!\n")
             continue
         else:
@@ -255,8 +297,7 @@ def addProfile(type):
             }
         ]
 
-        with open("./profiles.json", "w", encoding="utf-8") as f:
-            json.dump(d, f, indent=4)
+        updateProfiles(d)
 
         print(colors.bold + colors.green + f"\nProfile '{name}' succesfully added and selected! Now replace the examples in 'profiles.json'!" + colors.reset)
 
@@ -270,8 +311,7 @@ def addProfile(type):
             }
         )
 
-        with open("./profiles.json", "w", encoding="utf-8") as f:
-            json.dump(profiles, f, indent=4)
+        updateProfiles(profiles)
 
         print(colors.bold + colors.green + f"\nProfile '{name}' succesfully added!" + colors.reset)
 
@@ -305,8 +345,7 @@ def removeProfile():
 
     profiles.pop(selected)
     
-    with open("./profiles.json", "w", encoding="utf-8") as f:
-        json.dump(profiles, f, indent=4)
+    updateProfiles(profiles)
 
     print(colors.bold + colors.green + f"Profile '{removed["Name"]}' succesfully removed!")
 
