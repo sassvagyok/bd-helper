@@ -2,11 +2,11 @@
 Simple-to-use console application to somewhat automate tedious tasks when updating modpacks.
 
 ## Functions
-- Save preferred config files before updating a modpack
-- Load saved config files after updating a modpack
-- Removed preferred mods after updating
-- Copy over preferred mods after updating
-- Add different profiles for different modpacks
+- Save selected config files
+- Load saved config files
+- Remove preferred mods
+- Copy over preferred mods
+- Create different profiles for different modpacks
 
 ## Usage
 - All features of this program are optional, use what you want!
