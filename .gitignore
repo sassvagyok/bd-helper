@@ -4,3 +4,4 @@ dist
 profiles.json
 saved_configs
 saved_mods
+__pycache__
